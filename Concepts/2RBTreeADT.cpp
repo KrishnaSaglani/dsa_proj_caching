@@ -57,6 +57,8 @@ class RBTree
         // }RBNode;
 
         
+
+        
         void leftRotate(RBNode * Imb_node)  //Imb_node = Imbalanced node
         {
             RBNode * child = Imb_node->right;
@@ -78,6 +80,11 @@ class RBTree
             if(child ->left == Imb_node)cout<<endl<<" new root and Imb linked well too"<<endl;
             if(Imb_node->left == NULL)cout<<"Imb left has stayed NULL";
 
+            cout<<endl<<"in rot"<<endl;
+            printLinks(child);
+            cout<<"out of rot";
+            //concl: we are perfectly ok till here
+
             //relink to source now
             if(source==NULL) return;
             else
@@ -92,8 +99,7 @@ class RBTree
                 }
             }
 
-
-           
+            
         }
         //not designed to handle the colors right away
         //this is simply a rotator
@@ -197,15 +203,27 @@ class RBTree
                 parent->colour = 'b';
                 uncle->colour = 'b';
                  //since uncle exists..grandparent must exist too
-                grandparent->colour = 'r';
-                Balance(grandparent,grandparent->parent);
+                 if(grandparent -> parent == NULL) //grandparent is the root
+                 {
+                        grandparent->colour = 'b';
+                 }
+                 else
+                 {
+                        grandparent->colour = 'r';
+                        Balance(grandparent,grandparent->parent);
+                 }
+                
             }
+
+            cout<<"in bal"<<endl;
+            printLinks(root->parent);
+            cout<<"out of bal";
 
             return;
         }
 
         //height() and balance_check() is not required thanks to RB tree properties
-        RBNode * insert_helper(RBNode * current, RBNode * new_node)
+        void insert_helper(RBNode * current, RBNode * new_node)
         {
             //STEP 1: normal BST insertion, except the parent thing
             //here I am ordering this on the basis of timestamps
@@ -221,7 +239,7 @@ class RBTree
                 {
                     current->left->parent = current;
                     //hence as we go along, the parents are being established also 
-                    current->left = insert_helper(current->left,new_node);
+                    insert_helper(current->left,new_node);
                 }
                 
                 //now current point becomes parent
@@ -237,7 +255,7 @@ class RBTree
                 {
                     current->right->parent = current;//extra precaution
                     //hence as we go along, the parents are being established also 
-                    current->right = insert_helper(current->right,new_node);
+                    insert_helper(current->right,new_node);
                 }
             }
 
@@ -254,12 +272,15 @@ class RBTree
                 //Now just CLIMB to the top from here and whatever is 
                 //the topmost thing..just make it the root
 
-                while(current->parent !=NULL) current = current->parent;
+                while(current->parent != NULL) current = current->parent;
                 root = current; //SUPER SUPER IMPORTANT step
                 //because the tree is rotating around all the time...so root keeps changing
+
+                cout<<endl<<"in hf"<<endl;
+                printLinks(current);
+                cout<<"out of hf";
                 
-                if(current->left->right == NULL)cout<<endl<<"ooooooo";
-                return current;
+                // return current;
             }
         }
         //this function always returns the links to root
@@ -267,11 +288,32 @@ class RBTree
     public:
     RBNode * LRU_node; //keep updating this node as we go deleting LRU elements
     RBNode * root; //make this private later..this is just for Inorder Traversal testing
+
+    void printLinks(RBNode* node) 
+    {
+        if (!node) return;
+        cout << "Node " << node->key << ": ";
+        if (node->left) cout << "Left->" << node->left->key << " ";
+        else cout << "Left->NULL ";
+        if (node->right) cout << "Right->" << node->right->key << " ";
+        else cout << "Right->NULL ";
+        if (node->parent) cout << "Parent->" << node->parent->key << " ";
+        else cout << "Parent->NULL ";
+        cout << "Colour: " << node->colour << endl;
+        printLinks(node->left);
+        printLinks(node->right);
+        }
+
     RBNode  * insert(int key, int val, int time_stamp)
     {
-        cout<<"check1"<<endl;
         RBNode * new_node = new RBNode(key, val, time_stamp);
         //note: default colour is red
+
+        if(time_stamp < LRU_node->time_stamp)
+        {
+            LRU_node = new_node;
+            //yay so no need to LOOK up in the hashmap
+        }
 
         if(root == NULL)
         {
@@ -281,16 +323,20 @@ class RBTree
         }
         else
         {
-            root = insert_helper(root,new_node);
+            insert_helper(root,new_node);
             //old root, new_node
         }
         cout<< new_node->key << ":" << new_node->value <<" ("<< new_node->time_stamp <<") colour: "<<new_node->colour <<endl;    
-        return new_node;
+        
         //I will thus be returning the new_node's address so that it can be put into the 
         //hashmap also
-        
-        //hashmap shall have the key followed by node address
-    }
+
+        cout<<endl<<"in insert"<<endl;
+            printLinks(root);
+            cout<<"out of insert";
+
+            return new_node;
+        }
 
     void Level_Order()
     {
@@ -317,8 +363,9 @@ class RBTree
     void Inorder(RBNode * node)
     {
         if(node == NULL) return;
+
         Inorder(node->left);
-        cout<<node->key<<"io:"<<node->value<<" ("<<node->time_stamp <<") colour: "<<node->colour<<endl;    
+        cout<<node->key<<":"<<node->value<<" ("<<node->time_stamp <<") colour: "<<node->colour<<endl;    
         Inorder(node->right);
     }
 
@@ -327,15 +374,31 @@ class RBTree
         root = NULL;
         LRU_node = NULL;
     }
+
 };
 
 
 int main()
 {
     RBTree T;
-    RBNode * n1 = T.insert(1,1,100);
-    RBNode * n2 =T.insert(2,2,101);
-    RBNode * n3 = T.insert(3,3,102);
+    RBNode * n1 = T.insert(100,1,100);
+    RBNode * n2 =T.insert(101,2,101);
+    RBNode * n4 = T.insert(103,3,103);
+    RBNode * n3 = T.insert(99,3,99);
+    RBNode * n5 = T.insert(78,3,78);
+    RBNode * n6 = T.insert(32,3,32);
+    RBNode * n7 = T.insert(356,3,356);
+    RBNode * n8 = T.insert(42,3,42);
+    RBNode * n9 = T.insert(322,3,322);
+    RBNode * n10 = T.insert(123,3,123);
+    RBNode * n11 = T.insert(33,3,33);
+    RBNode * n12 = T.insert(5456,3,5456);
+    RBNode * n13 = T.insert(65,3,65);
+    RBNode * n14 = T.insert(221,3,221);
+    RBNode * n15 = T.insert(3452,3,3452);
 
-    // T.Inorder(T.root);
+    cout<<"end of tree creation"<<endl;
+
+    cout<<endl<<endl<<endl;
+    T.Inorder(T.root);
 }
