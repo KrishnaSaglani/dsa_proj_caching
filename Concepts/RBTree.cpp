@@ -53,11 +53,6 @@ class RBTree
             if(child ->left == Imb_node)cout<<endl<<" new root and Imb linked well too"<<endl;
             if(Imb_node->left == NULL)cout<<"Imb left has stayed NULL";
 
-            cout<<endl<<"in rot"<<endl;
-            printLinks(child);
-            cout<<"out of rot";
-            //concl: we are perfectly ok till here
-
             //relink to source now
             if(source==NULL) return;
             else
@@ -72,7 +67,8 @@ class RBTree
                 }
             }
 
-            
+
+           
         }
         //not designed to handle the colors right away
         //this is simply a rotator
@@ -121,7 +117,7 @@ class RBTree
             if(parent == NULL) return; // view uncle-'red' case
             if(parent->colour == 'b') return; //yay no problem here
 
-            //now else case: parent->colour == 'r'
+            //now else case: parent_>colour == 'r'
             //hence grandparent MUST be black for sure
             RBNode * grandparent = parent->parent;
             // if you reach here...grandparent MUST exist for sure
@@ -176,7 +172,7 @@ class RBTree
                 parent->colour = 'b';
                 uncle->colour = 'b';
                  //since uncle exists..grandparent must exist too
-                 if(grandparent -> parent == NULL) //grandparent is the root
+                if(grandparent -> parent == NULL) //grandparent is the root
                  {
                         grandparent->colour = 'b';
                  }
@@ -185,12 +181,7 @@ class RBTree
                         grandparent->colour = 'r';
                         Balance(grandparent,grandparent->parent);
                  }
-                
             }
-
-            cout<<"in bal"<<endl;
-            printLinks(root->parent);
-            cout<<"out of bal";
 
             return;
         }
@@ -245,10 +236,11 @@ class RBTree
                 //Now just CLIMB to the top from here and whatever is 
                 //the topmost thing..just make it the root
 
-                while(current->parent != NULL) current = current->parent;
+                while(current->parent !=NULL) current = current->parent;
                 root = current; //SUPER SUPER IMPORTANT step
                 //because the tree is rotating around all the time...so root keeps changing
-
+                
+                
                 cout<<endl<<"in hf"<<endl;
                 printLinks(current);
                 cout<<"out of hf";
@@ -256,114 +248,9 @@ class RBTree
         }
         //this function always returns the links to root
 
-        void delete_fixup(RBNode * d_black, RBNode * parent)
-        {
-            if(parent == NULL) //dbalck is root
-            {
-                return;
-                //the black height of tree just went up by 1
-                // as we converted double black to single without actually adding a black node
-            }
-
-            RBNode * sibling = (parent->left == d_black)? parent->right: parent->left;
-            bool left_child = (parent->left == d_black)? true : false;
-
-            //Q: what if sibling is NULL?
-            if(sibling == NULL)
-            {
-                delete_fixup(parent, parent->parent);
-                return;
-                //if sibling is null, then double black is pushed up to parent node
-            }
-
-            if(sibling->colour == 'r')
-            {
-                if(left_child)
-                {
-                    leftRotate(parent);
-                    parent->colour = 'r';
-                    sibling->colour = 'b';
-
-                    //now we will have a NEW sibling..whose colour is ALWAYS BLACK
-                    //as it was child of a red node
-                    //Hence, be go back to case of sibling->colour being black
-
-                    delete_fixup(d_black, parent);
-                }
-                else
-                {
-                    rightRotate(parent);
-                    parent->colour = 'r';
-                    sibling->colour = 'b';
-
-                    delete_fixup(d_black, parent);
-                }
-            }
-            else //sibling is black
-            {
-                if(sibling->left->colour == 'b' && sibling->right->colour == 'b')
-                {
-                    //both kids black
-                    if(parent->colour == 'r')
-                    {
-                        parent->colour = 'b';
-                        //red + black = double black
-                        sibling->colour = 'r';//extra colouring...always try to do so
-                        //wherever RED is possible,,it should be added to make tree more balanced
-                        return;
-                    }
-                    else
-                    {
-                        sibling->colour = 'r';
-                        delete_fixup(parent, parent->parent);
-                    }
-                }
-                else//at least one of child sibling is red
-                //check this else Logic out one more time during final testing
-                {
-                    bool left_red = sibling->left->colour=='r' ? true: false;
-                    //don't assume that parent is black only
-                    if(left_child)
-                    {
-                        if(left_red)
-                        {
-                            rightRotate(sibling);
-                            leftRotate(parent);
-                            sibling->left->colour = parent->colour;
-                        }
-                        else
-                        {
-                                leftRotate(parent);
-                                sibling->right->colour = sibling->colour;
-                                sibling->colour = parent->colour;
-                        }
-                        parent->colour = 'b';
-                    }
-                    else
-                    {
-                        if(left_red)
-                        {
-                                rightRotate(parent);
-                                sibling->left->colour = sibling->colour;
-                                sibling->colour = parent->colour;
-                        }
-                        else
-                        {
-                                leftRotate(sibling);
-                                rightRotate(parent);
-                                sibling->right->colour = parent->colour;
-                        }
-                    }
-                }
-            }
-
-    }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public:
     RBNode * LRU_node; //keep updating this node as we go deleting LRU elements
     RBNode * root; //make this private later..this is just for Inorder Traversal testing
-
     void printLinks(RBNode* node) 
     {
         if (!node) return;
@@ -378,7 +265,7 @@ class RBTree
         printLinks(node->left);
         printLinks(node->right);
     }
-
+    
     RBNode  * insert(int key, int val, int time_stamp)
     {
         RBNode * new_node = new RBNode(key, val, time_stamp);
@@ -402,7 +289,7 @@ class RBTree
         
         //hashmap shall have the key followed by node address
     }
-    
+
     void Level_Order()
     {
         queue <RBNode*> q; //lets just store timestamps for now
@@ -417,7 +304,7 @@ class RBTree
             {
                 q.push(q.front()->left);
             }
-            if(q.front()->right !=NULL)
+            else
             {
                 q.push(q.front()->right);
             }
@@ -428,178 +315,16 @@ class RBTree
     void Inorder(RBNode * node)
     {
         if(node == NULL) return;
-
         Inorder(node->left);
         cout<<node->key<<":"<<node->value<<" ("<<node->time_stamp <<") colour: "<<node->colour<<endl;    
         Inorder(node->right);
     }
-
-    RBNode * smallest(RBNode * node)
-    {
-        if(node->left == NULL) return node;
-        else return smallest(node->left);
-    }
-
-    RBNode * replacement(RBNode * node)
-    {
-        //leaf
-        if(node->left == NULL && node->right == NULL) return NULL;
-
-        //one child
-        if(node->left == NULL) return node->right;
-        else if(node->right == NULL) return node->left;
-
-        //else : only option left: both not null
-        else return smallest(node->right); //inorder successor
-    }
-
-    void swap_data(RBNode * n1, RBNode * n2)
-    {
-        n1->key = n2->key;
-        n1->value = n2->value;
-        n1->time_stamp = n2->time_stamp;
-    }
-
-
-    void delete_node(RBNode * v)
-    {
-        RBNode * rep = replacement(v);
-        RBNode * parent = v->parent;
-        bool left_child = true;
-
-        if(parent!=NULL)
-         left_child = (v->time_stamp <= parent->time_stamp) ? true: false;
-        
-        bool both_black = (rep == NULL || rep->colour == 'b') && v->colour == 'b' ? true: false;
-
-
-        if(both_black) // hence double blacks are going to be created here
-        {
-
-            RBNode * d_black;
-
-            if(rep == NULL) //hence v is leaf
-            {
-                if(parent == NULL)//root
-                {
-                    root = NULL;
-                }
-                else if(left_child)
-                {
-                    parent->left = NULL;
-                }
-                else
-                {
-                    parent->right = NULL;
-                }
-                delete(v);
-                d_black = NULL;
-                //so HOW will we locate it?-> parent of dblack is still the same as v's parent...
-            }
-            else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
-            {
-                if(parent == NULL) //v can even be the root..so it Must be black
-                {
-                    swap_data(v,rep);
-                    delete_node(rep);
-                }
-                else if(left_child) 
-                {
-                    parent->left = rep;
-                    rep->parent = parent;
-                }
-                else
-                {
-                    parent->right = rep;
-                    rep->parent = parent;
-                }
-                delete(v);
-                d_black = rep;
-
-            }
-            else //rep is inorder successor of v
-            {
-                swap_data(v,rep);
-                delete_node(rep); //recur this to the rep node now
-                //also, rep is always a leaf node in this case so the value it gets doesn't matter
-                //now if rep is red...itll be direct deleted..but this is both black case
-                // else it will get a delete_fixup workout 
-            }
-
-            //Now time for dblack fixing
-
-            delete_fixup(d_black, parent);
-            //parent is just in case dblack is NULL
-
-        }
-        else //on of them is red..easier case
-        {
-            //copy data from rep to v and delete one of them
-
-            if(rep == NULL) //hence v is leaf
-            {
-                
-                if(left_child)
-                {
-                    parent->left = NULL;
-                }
-                else
-                {
-                    parent->right = NULL;
-                }
-                delete(v);
-            }
-            else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
-            {
-                if(parent == NULL) //v can even be the root..so it Must be black
-                {
-                    if(rep == v->right)
-                    {
-                        rep->left = v->left;
-                        v->left->parent = rep;
-                    }
-                    else
-                    {
-                        rep->right =v->right;
-                        v->right->parent = rep;
-                        
-                    }
-
-                    root = rep;
-                    rep->colour = 'b';
-                    rep->parent = NULL;
-                    delete(v);
-                }
-                else if(left_child) 
-                {
-                    parent->left = rep;
-                    rep->parent = parent;
-                }
-                else
-                {
-                    parent->right = rep;
-                    rep->parent = parent;
-                }
-                rep->colour = 'b';
-                delete(v);
-
-            }
-            else //rep is inorder successor of v
-            {
-                swap_data(v,rep);
-                v->colour = 'b';
-                delete_node(rep); //recur this to rep node now
-            }
-        }
-    }
-
 
     RBTree()
     {
         root = NULL;
         LRU_node = NULL;
     }
-
 };
 
 
@@ -611,27 +336,17 @@ int main()
     RBNode * n4 = T.insert(103,3,103);
     RBNode * n3 = T.insert(99,3,99);
     RBNode * n5 = T.insert(78,3,78);
-    // RBNode * n6 = T.insert(32,3,32);
-    // RBNode * n7 = T.insert(356,3,356);
-    // RBNode * n8 = T.insert(42,3,42);
-    // RBNode * n9 = T.insert(322,3,322);
-    // RBNode * n10 = T.insert(123,3,123);
-    // RBNode * n11 = T.insert(33,3,33);
-    // RBNode * n12 = T.insert(5456,3,5456);
-    // RBNode * n13 = T.insert(65,3,65);
-    // RBNode * n14 = T.insert(221,3,221);
-    // RBNode * n15 = T.insert(3452,3,3452);
+    RBNode * n6 = T.insert(32,3,32);
+    RBNode * n7 = T.insert(356,3,356);
+    RBNode * n8 = T.insert(42,3,42);
+    RBNode * n9 = T.insert(322,3,322);
+    RBNode * n10 = T.insert(123,3,123);
+    RBNode * n11 = T.insert(33,3,33);
+    RBNode * n12 = T.insert(5456,3,5456);
+    RBNode * n13 = T.insert(65,3,65);
+    RBNode * n14 = T.insert(221,3,221);
+    RBNode * n15 = T.insert(3452,3,3452);
 
-    cout<<"end of tree creation"<<endl;
-
-    cout<<endl<<endl<<endl;
-    T.Inorder(T.root);
-    T.printLinks(T.root);
-
-    T.delete_node(T.root);
-    cout<<endl<<endl<<endl;
-    
     cout<<endl<<endl<<endl;
     T.Inorder(T.root);
 }
-
