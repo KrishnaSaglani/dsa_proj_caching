@@ -57,8 +57,6 @@ class RBTree
         // }RBNode;
 
         
-
-        
         void leftRotate(RBNode * Imb_node)  //Imb_node = Imbalanced node
         {
             RBNode * child = Imb_node->right;
@@ -285,7 +283,9 @@ class RBTree
         }
         //this function always returns the links to root
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public:
+
     RBNode * LRU_node; //keep updating this node as we go deleting LRU elements
     RBNode * root; //make this private later..this is just for Inorder Traversal testing
 
@@ -367,6 +367,213 @@ class RBTree
         Inorder(node->left);
         cout<<node->key<<":"<<node->value<<" ("<<node->time_stamp <<") colour: "<<node->colour<<endl;    
         Inorder(node->right);
+    }
+
+    RBNode * smallest(RBNode * node)
+    {
+        if(node->left == NULL) return node;
+        else return smallest(node->left);
+    }
+    RBNode * replacement(RBNode * node)
+    {
+        //leaf
+        if(node->left == NULL && node->right == NULL) return NULL;
+
+        //one child
+        if(node->left == NULL) return node->right;
+        else if(node->right == NULL) return node->left;
+
+        //else : only option left: both not null
+        else return smallest(node->right); //inorder successor
+    }
+
+    // void delete_node(RBNode * node)
+    // {
+    //     RBNode * v = node;
+    //     RBNode * rep = replacement(v);
+    //     //we finally want to replace v with rep
+
+    //     bool both_black = (rep == NULL || rep->colour == 'b') && v == 'b' ? true: false;
+
+    //     if(rep == NULL) // hence v is leaf node
+    //     {
+    //         if(v == root)
+    //         {
+    //             root = NULL;
+    //         }
+    //         else if(!both_black)
+    //         {
+    //             RBNode * sibling = find_sibling(v);
+    //             if(sibling != NULL)
+    //             {
+    //                 sibling->colour = 'r';
+    //                 //so that black 
+    //             }
+    //         }
+    //         else if(both_black) // so b is black
+    //         {
+    //             //so on removing v, a double black is created here
+    //             fixDoubleBlack(v);
+    //         }
+    //         else // v is thus red
+    //         {
+    //             //did not understand this bit just yet
+    //             if(find_sibling(v) != NULL)
+    //             {
+    //                 find_sibling(v)->colour = 'r';
+    //             }
+    //         }
+
+    //         delete(v);
+    //         return;
+    //     }
+
+    //     //v has one child
+    //     else if(v->left == NULL || v->right == NULL) 
+    //     {
+
+    //     }
+
+    //     else
+    //     {
+
+    //     }
+    // }
+
+    void swap_data(RBNode * n1, RBNode * n2)
+    {
+        n1->key = n2->key;
+        n1->value = n2->value;
+        n1->time_stamp = n2->time_stamp;
+    }
+
+    void delete_fixup(RBNode * d_black, RBNode * parent)
+    {
+        if(parent == NULL) //dbalck is root
+        {
+            return;
+            //the black height of tree just went up by 1
+            // as we converted double black to single without actually adding a black node
+        }
+
+        RBNode * sibling = (parent->left == d_black)? parent->right: parent->left;
+        bool left_child = (parent->left == d_black)? true: false;
+
+        if(sibling->colour == 'r')
+        {
+            if(left_child)
+            {
+                leftRotate(parent);
+                parent->colour = 'r';
+                sibling->colour = 'b';
+
+            }
+        }
+        else
+        {
+            
+        }
+
+
+    }
+    
+
+    void delete_node(RBNode * v)
+    {
+        RBNode * rep = replacement(v);
+        RBNode * parent = v->parent;
+        bool left_child = (v->time_stamp <= parent->time_stamp) ? true: false;
+        bool both_black = (rep == NULL || rep->colour == 'b') && v->colour == 'b' ? true: false;
+
+        if(both_black) // hence double blacks are going to be created here
+        {
+            RBNode * sibling = find_sibling(v);
+            RBNode * d_black;
+
+            if(rep == NULL) //hence v is red
+            {
+                if(left_child)
+                {
+                    parent->left = NULL;
+                }
+                else
+                {
+                    parent->right = NULL;
+                }
+                delete(v);
+                d_black = NULL;
+                //so HOW will we locate it?-> parent of dblack is still the same as v's parent...
+            }
+            else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
+            {
+                if(left_child) 
+                {
+                    parent->left = rep;
+                    rep->parent = parent;
+                }
+                else
+                {
+                    parent->right = rep;
+                    rep->parent = parent;
+                }
+                delete(v);
+                d_black = rep;
+
+            }
+            else //rep is inorder successor of v
+            {
+                swap_data(v,rep);
+                delete_node(rep); //recur this to the rep node now
+                //also, rep is always a leaf node in this case so the value it gets doesn't matter
+                //now if rep is red...itll be direct deleted..but this is both black case
+                // else it will get a delete_fixup workout 
+            }
+
+            //Now time for dblack fixing
+
+            delete_fixup(d_black, parent);
+            //parent is just in case dblack is NULL
+
+        }
+        else //on of them is red..easier case
+        {
+            //copy data from rep to v and delete one of them
+
+            if(rep == NULL) //hence v is red
+            {
+                if(left_child)
+                {
+                    parent->left = NULL;
+                }
+                else
+                {
+                    parent->right = NULL;
+                }
+                delete(v);
+            }
+            else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
+            {
+                if(left_child) 
+                {
+                    parent->left = rep;
+                    rep->parent = parent;
+                }
+                else
+                {
+                    parent->right = rep;
+                    rep->parent = parent;
+                }
+                rep->colour = 'b';
+                delete(v);
+
+            }
+            else //rep is inorder successor of v
+            {
+                swap_data(v,rep);
+                v->colour = 'b';
+                delete_node(rep); //recur this to rep node now
+            }
+        }
     }
 
     RBTree()

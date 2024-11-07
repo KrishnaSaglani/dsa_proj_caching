@@ -1,0 +1,12 @@
+1.
+forgot to initialize the RBTree condstructor..and the code only ran once
+    -Always start class be defining private variables and constructors
+
+2. Deletion vs Insertion
+
+    -Like Insertion, recoloring and rotations are used to maintain the Red-Black properties.
+In the insert operation, we check the color of the uncle to decide the appropriate case. In the delete operation, we check the color of the sibling to decide the appropriate case.
+
+    -The main property that violates after insertion is two consecutive reds. In delete, the main violated property is, change of black height in subtrees as deletion of a black node may cause reduced black height in one root to leaf path.
+
+    -Deletion is a fairly complex process.  To understand deletion, the notion of double black is used.  When a black node is deleted and replaced by a black child, the child is marked as double black. The main task now becomes to convert this double black to single black.
