@@ -39,6 +39,29 @@ class RBTree
         {
             RBNode * child = Imb_node->right;
             RBNode * temp = child->left;
+            RBNode * source = Imb_node->parent;
+            
+
+            //now lets rotate
+            child->left = Imb_node;
+            Imb_node->right = temp;
+            temp->parent = Imb_node;
+            Imb_node->parent = child;
+            child->parent = source;
+
+            //relink to source now
+            if(source==NULL) return;
+            else
+            {
+                if(source->time_stamp >= Imb_node->time_stamp)//Imb_Node WAS left child
+                {
+                    source->left = child;
+                }
+                else
+                {
+                    source->right = child;
+                }
+            }
            
         }
         //not designed to handle the colors right away
@@ -46,7 +69,31 @@ class RBTree
 
         void rightRotate(RBNode * Imb_node)
         {
+            RBNode * child = Imb_node->left;
+            RBNode * temp = child->right;
+            RBNode * source = Imb_node->parent;
             
+
+            //now lets rotate
+            child->right = Imb_node;
+            Imb_node->left = temp;
+            temp->parent = Imb_node;
+            Imb_node->parent = child;
+            child->parent = source;
+
+            //relink to source now
+            if(source==NULL) return;
+            else
+            {
+                if(source->time_stamp >= Imb_node->time_stamp)//Imb_Node WAS left child
+                {
+                    source->left = child;
+                }
+                else
+                {
+                    source->right = child;
+                }
+            }
         }
         //not designed to handle the colors right away
         //this is simply a rotator
@@ -77,10 +124,11 @@ class RBTree
             {
                 //rotation then recolouring
                 //assuming grandparent exists..if not then still okay
+                //as it will just be a NULL return point
                 bool left_child = (child->time_stamp<=parent->time_stamp)? true:false;
 
 
-                if(parent->time_stamp<=grandparent->time_stamp) //parent at left
+                if(parent->time_stamp <= grandparent->time_stamp) //parent at left
                 {
                     if(left_child)
                     {
@@ -93,7 +141,7 @@ class RBTree
                         leftRotate(parent);
                         rightRotate(grandparent);
                         grandparent->colour = 'r';
-                        child->colour = 'b';
+                        child->colour = 'b';//now child is in place of parent
                     }
                 }
 
