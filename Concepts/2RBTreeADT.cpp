@@ -576,6 +576,12 @@ class RBTree
         }
     }
 
+    void dummy_delete(RBNode * n)
+    {
+        //simply deletes the LRU node for the time being, no matter what the input
+        delete(LRU_node);
+    }
+
     RBTree()
     {
         root = NULL;
