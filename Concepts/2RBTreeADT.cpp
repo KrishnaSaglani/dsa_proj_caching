@@ -387,59 +387,6 @@ class RBTree
         else return smallest(node->right); //inorder successor
     }
 
-    // void delete_node(RBNode * node)
-    // {
-    //     RBNode * v = node;
-    //     RBNode * rep = replacement(v);
-    //     //we finally want to replace v with rep
-
-    //     bool both_black = (rep == NULL || rep->colour == 'b') && v == 'b' ? true: false;
-
-    //     if(rep == NULL) // hence v is leaf node
-    //     {
-    //         if(v == root)
-    //         {
-    //             root = NULL;
-    //         }
-    //         else if(!both_black)
-    //         {
-    //             RBNode * sibling = find_sibling(v);
-    //             if(sibling != NULL)
-    //             {
-    //                 sibling->colour = 'r';
-    //                 //so that black 
-    //             }
-    //         }
-    //         else if(both_black) // so b is black
-    //         {
-    //             //so on removing v, a double black is created here
-    //             fixDoubleBlack(v);
-    //         }
-    //         else // v is thus red
-    //         {
-    //             //did not understand this bit just yet
-    //             if(find_sibling(v) != NULL)
-    //             {
-    //                 find_sibling(v)->colour = 'r';
-    //             }
-    //         }
-
-    //         delete(v);
-    //         return;
-    //     }
-
-    //     //v has one child
-    //     else if(v->left == NULL || v->right == NULL) 
-    //     {
-
-    //     }
-
-    //     else
-    //     {
-
-    //     }
-    // }
-
     void swap_data(RBNode * n1, RBNode * n2)
     {
         n1->key = n2->key;
@@ -457,7 +404,8 @@ class RBTree
         }
 
         RBNode * sibling = (parent->left == d_black)? parent->right: parent->left;
-        bool left_child = (parent->left == d_black)? true: false;
+        bool left_child = (parent->left == d_black)? true : false;
+        //Q: what if sibling is NULL?
 
         if(sibling->colour == 'r')
         {
@@ -467,15 +415,74 @@ class RBTree
                 parent->colour = 'r';
                 sibling->colour = 'b';
 
+                //now we will have a NEW sibling..whose colour is ALWAYS BLACK
+                //as it was child of a red node
+                //Hence, be go back to case of sibling->colour being black
+
+                delete_fixup(d_black, parent);
+            }
+            else
+            {
+                rightRotate(parent);
+                parent->colour = 'r';
+                sibling->colour = 'b';
+
+                delete_fixup(d_black, parent);
             }
         }
-        else
+        else //sibling is black
         {
-            
+            if(sibling->left->colour == 'b' && sibling->right->colour == 'b')
+            {
+                //both kids black
+                if(parent->colour == 'r')
+                {
+                    parent->colour = 'b';
+                    //red + black = double black
+                    return;
+                }
+                else
+                {
+                    sibling->colour = 'r';
+                    delete_fixup(parent, parent->parent);
+                }
+            }
+            else//at least one of child sibling is red
+            {
+                bool left_red = sibling->left->colour=='r' ? true: false;
+
+                if(left_child)
+                {
+                    if(left_red)
+                    {
+                        rightRotate(sibling);
+                        leftRotate(parent);
+                        sibling->right->colour = 'b';
+                    }
+                    else
+                    {
+                            leftRotate(parent);
+                            sibling->right->colour = 'b';
+                    }
+                }
+                else
+                {
+                    if(left_red)
+                    {
+                            rightRotate(parent);
+                            sibling->right->colour = 'b';
+                    }
+                    else
+                    {
+                            leftRotate(sibling);
+                            rightRotate(parent);
+                            sibling->right->colour = 'b';
+                    }
+                }
+            }
         }
 
-
-    }
+  }
     
 
     void delete_node(RBNode * v)
@@ -485,9 +492,10 @@ class RBTree
         bool left_child = (v->time_stamp <= parent->time_stamp) ? true: false;
         bool both_black = (rep == NULL || rep->colour == 'b') && v->colour == 'b' ? true: false;
 
+
         if(both_black) // hence double blacks are going to be created here
         {
-            RBNode * sibling = find_sibling(v);
+
             RBNode * d_black;
 
             if(rep == NULL) //hence v is red
@@ -617,3 +625,4 @@ int main()
     cout<<endl<<endl<<endl;
     T.Inorder(T.root);
 }
+
