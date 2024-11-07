@@ -8,8 +8,13 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
+<<<<<<< HEAD
       "cwd": "c:/Users/lenovo/Desktop/dsa_proj_caching/code",
       "program": "c:/Users/lenovo/Desktop/dsa_proj_caching/code/build/Debug/outDebug",
+=======
+      "cwd": "c:/Users/lenovo/Desktop/dsa_proj_caching-1/code",
+      "program": "c:/Users/lenovo/Desktop/dsa_proj_caching-1/code/build/Debug/outDebug",
+>>>>>>> 48ee03b2949a2fc78b2da059a2ab980382a5253a
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
