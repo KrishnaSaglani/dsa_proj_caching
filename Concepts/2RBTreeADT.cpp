@@ -689,7 +689,22 @@ int main()
     T.Inorder(T.root);
     T.printLinks(T.root);
 
+
+    //TEST 1
+
     T.delete_node(T.root->left);
+    // T.delete_node(T.root);
+    cout<<endl<<endl<<endl<<"Deletion complete"<<endl;
+    
+    cout<<endl<<endl<<endl<<"yo";
+    cout<<"root is"<<T.root->time_stamp<<endl;
+    T.Inorder(T.root);
+        T.printLinks(T.root);
+
+        //TEST 2
+
+        T.delete_node(T.root->left);
+    // T.delete_node(T.root);
     cout<<endl<<endl<<endl<<"Deletion complete"<<endl;
     
     cout<<endl<<endl<<endl<<"yo";
