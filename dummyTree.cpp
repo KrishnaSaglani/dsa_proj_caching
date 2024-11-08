@@ -49,13 +49,13 @@ class RBTree
             // if(temp == NULL) Imb_node->right = NULL; useless
 
             //test prints
-            // if(Imb_node->right == NULL)cout<<"Imb_node linked well with temp"<<endl;
-            // if(child ->left == Imb_node)cout<<endl<<" new root and Imb linked well too"<<endl;
-            // if(Imb_node->left == NULL)cout<<"Imb left has stayed NULL";
+            if(Imb_node->right == NULL)cout<<"Imb_node linked well with temp"<<endl;
+            if(child ->left == Imb_node)cout<<endl<<" new root and Imb linked well too"<<endl;
+            if(Imb_node->left == NULL)cout<<"Imb left has stayed NULL";
 
-            // cout<<endl<<"in rot"<<endl;
-            // printLinks(child);
-            // cout<<"out of rot";
+            cout<<endl<<"in rot"<<endl;
+            printLinks(child);
+            cout<<"out of rot";
             //concl: we are perfectly ok till here
 
             //relink to source now
@@ -127,7 +127,7 @@ class RBTree
             // if you reach here...grandparent MUST exist for sure
 
             RBNode * uncle = find_sibling(parent);
-            // if(uncle==NULL)cout<<"Uncle is NULL"<<endl;
+            if(uncle==NULL)cout<<"Uncle is NULL"<<endl;
             if(uncle==NULL  || uncle->colour == 'b') //black uncle..in RB trees we consider NULL as black also
             {
                 //rotation then recolouring
@@ -188,9 +188,9 @@ class RBTree
                 
             }
 
-            // cout<<"in bal"<<endl;
-            // printLinks(root->parent);
-            // cout<<"out of bal";
+            cout<<"in bal"<<endl;
+            printLinks(root->parent);
+            cout<<"out of bal";
 
             return;
         }
@@ -249,48 +249,24 @@ class RBTree
                 root = current; //SUPER SUPER IMPORTANT step
                 //because the tree is rotating around all the time...so root keeps changing
 
-                // cout<<endl<<"in hf"<<endl;
-                // printLinks(current);
-                // cout<<"out of hf";
+                cout<<endl<<"in hf"<<endl;
+                printLinks(current);
+                cout<<"out of hf";
             }
         }
         //this function always returns the links to root
 
-        bool both_black_children(RBNode * node)
-        {
-            bool ans = true;
-
-            if(node->left !=NULL)
-            {
-                if(node->left->colour == 'r')
-                {
-                    ans = false;
-                }
-            }
-            if(node->right !=NULL)
-            {
-                if(node->right->colour == 'r')
-                {
-                    ans = false;
-                }
-            }
-
-            return ans;
-        }
-
         void delete_fixup(RBNode * d_black, RBNode * parent)
         {
-            
             if(parent == NULL) //dbalck is root
             {
-                root = d_black;
+                root = parent;
                 return;
                 //the black height of tree just went up by 1
                 // as we converted double black to single without actually adding a black node
             }
 
             RBNode * sibling = (parent->left == d_black)? parent->right: parent->left;
-            cout<<"Sibling is "<<sibling->time_stamp<<endl;
             bool left_child = (parent->left == d_black)? true : false;
 
             //Q: what if sibling is NULL?
@@ -330,18 +306,15 @@ class RBTree
                     if(parent == root)
                     {
                         root = parent->parent;
-                        cout<<endl<<"root after rotation is "<<root->time_stamp<<endl;
-                        //should be 99 in my ex.
                     }
 
-                    //now the new sibling is guaranteed to be red
                     delete_fixup(d_black, parent);
                 }
             }
             else //sibling is black
             {
-                
-                if( both_black_children(sibling) )
+                cout<<"Sibling is "<<sibling->time_stamp<<endl;
+                if(sibling->left->colour == 'b' && sibling->right->colour == 'b')
                 {
                     //both kids black
                     if(parent->colour == 'r')
@@ -449,10 +422,7 @@ class RBTree
             insert_helper(root,new_node);
             //old root, new_node
         }
-        // cout<< new_node->key << ":" << new_node->value <<" ("<< new_node->time_stamp <<") colour: "<<new_node->colour <<endl;    
-        
-        cout<<endl<<endl<<"so far:"<<endl;
-        printLinks(root);
+        cout<< new_node->key << ":" << new_node->value <<" ("<< new_node->time_stamp <<") colour: "<<new_node->colour <<endl;    
         return new_node;
         //I will thus be returning the new_node's address so that it can be put into the 
         //hashmap also
@@ -517,7 +487,6 @@ class RBTree
         swap(n1->time_stamp, n2->time_stamp);
     }
 
-    
 
     void delete_node(RBNode * v)
     {
@@ -529,9 +498,13 @@ class RBTree
         if(parent!=NULL)
          left_child = (parent->left == v) ? true: false;
 
-        //  cout<<"v is "<<v->time_stamp;
-        //  if(left_child) cout<<"  and v is left child"<<endl;
-        //  else cout<<"  and v is right child"<<endl;
+        //LRU thingy todo
+
+
+
+        cout<<"v is "<<v->time_stamp;
+         if(left_child) cout<<"  and v is left child"<<endl;
+         else cout<<"  and v is right child"<<endl;
          //NEVER DO THIS ON BASIS OF TIMESTAMPS...BECAUSE WE HAVE SWAPPING OCCURING TOO 
         
         bool both_black = (rep == NULL || rep->colour == 'b') && v->colour == 'b' ? true: false;
@@ -558,7 +531,6 @@ class RBTree
                 }
                 else
                 {
-                    cout<<"i was here check 1"<<endl;
                     parent->right = NULL;
                 }
                 delete(v);
@@ -569,7 +541,7 @@ class RBTree
             {
                 if(parent == NULL) //v can even be the root..so it Must be black
                 {
-                    cout<<"okay so parent is NULL for "<<root->time_stamp<<endl;
+                    cout<<"okay so parent is NULL for 101"<<endl;
                     swap_data(v,rep);
                     delete_node(rep);
                     fixup_done = true;
@@ -601,7 +573,8 @@ class RBTree
             }
 
             //Now time for dblack fixing
-            if(fixup_done == false)
+            cout<<"okay so far";
+            if(!fixup_done)
             delete_fixup(d_black, parent);
             //parent is just in case dblack is NULL
 
@@ -625,21 +598,21 @@ class RBTree
             }
             else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
             {
+
                 if(parent == NULL) //v can even be the root..so it Must be black
                 {
-                    if(rep == v->right)
-                    {
-                        rep->left = v->left;
-                        if(v->left != NULL)
-                            v->left->parent = rep;
-                    }
-                    else
-                    {
-                        rep->right =v->right;
-                        if(v->right != NULL)
-                            v->right->parent = rep;
-                        cout<<"If im right this is where i am"<<endl;
-                    }
+                    //recent most change
+                    // if(rep == v->right)
+                    // {
+                    //     rep->left = v->left;
+                    //     v->left->parent = rep;
+                    // }
+                    // else
+                    // {
+                    //     rep->right =v->right;
+                    //     v->right->parent = rep;
+                        
+                    // }
 
                     root = rep;
                     rep->colour = 'b';
@@ -655,10 +628,20 @@ class RBTree
                     parent->right = rep;
                     rep->parent = parent;
                 }
+
+                if(rep == v->right)
+                    {
+                        rep->left = v->left;
+                        v->left->parent = rep;
+                    }
+                    else
+                    {
+                        rep->right =v->right;
+                        v->right->parent = rep;
+                        
+                    }
                 rep->colour = 'b';
                 delete(v);
-
-                cout<<"okay so far..root is "<<root->time_stamp<<endl;
 
             }
             else //rep is inorder successor of v
@@ -666,6 +649,7 @@ class RBTree
                 swap_data(v,rep);
                 v->colour = 'b';
                 delete_node(rep); //recur this to rep node now
+                return;
             }
         }
     }
@@ -690,64 +674,41 @@ int main()
     RBNode * n5 = T.insert(78,3,78);
     RBNode * n6 = T.insert(32,3,32);
     RBNode * n7 = T.insert(356,3,356);
-    RBNode * n8 = T.insert(42,3,42);
-    RBNode * n9 = T.insert(322,3,322);
-    RBNode * n10 = T.insert(123,3,123);
+    // RBNode * n8 = T.insert(42,3,42);
+    // RBNode * n9 = T.insert(322,3,322);
+    // RBNode * n10 = T.insert(123,3,123);
     // RBNode * n11 = T.insert(33,3,33);
     // RBNode * n12 = T.insert(5456,3,5456);
     // RBNode * n13 = T.insert(65,3,65);
     // RBNode * n14 = T.insert(221,3,221);
     // RBNode * n15 = T.insert(3452,3,3452);
 
-    cout<<"end of tree creation"<<endl<<endl;
+    cout<<"end of tree creation"<<endl;
 
-    //TEST 1
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 1"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
     cout<<endl<<endl<<endl;
-
-    //TEST 2
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 2"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
     T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
-
-    //TEST 3
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 3"<<endl;
-    //problem is basically root manipulation after deletion occurs
     T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
 
-    //TEST 4
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 4"<<endl;
-    //problem is basically root manipulation after deletion occurs
+    T.delete_node(T.root->left);
+    cout<<endl<<endl<<endl<<"Deletion complete"<<endl;
+    
+    cout<<endl<<endl<<endl<<"yo";
+    cout<<"root is"<<T.root->time_stamp<<endl;
+    T.Inorder(T.root);
+        T.printLinks(T.root);
+
+
+        cout<<endl<<endl<<endl;
+    T.Inorder(T.root);
     T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
+
+    T.delete_node(T.root->left);
+    cout<<endl<<endl<<endl<<"Deletion complete"<<endl;
+    
+    cout<<endl<<endl<<endl<<"yo";
+    cout<<"root is"<<T.root->time_stamp<<endl;
     T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
-
-    //TEST 5
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 5"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
-
-
-    cout<<"yayy....?";
+        T.printLinks(T.root);
 
 }
 

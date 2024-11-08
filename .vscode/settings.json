@@ -59,6 +59,15 @@
   "files.associations": {
     "ostream": "cpp",
     "iostream": "cpp",
-    "new": "cpp"
+    "new": "cpp",
+    "*.tcc": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "vector": "cpp",
+    "chrono": "cpp",
+    "iosfwd": "cpp"
   }
 }

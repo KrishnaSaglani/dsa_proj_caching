@@ -1,0 +1,5 @@
+put 1 Krishna
+put 2 Sriya
+get 1
+get 7
+put 3 Kashish 
