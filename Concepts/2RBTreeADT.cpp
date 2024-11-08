@@ -498,7 +498,11 @@ class RBTree
         if(parent!=NULL)
          left_child = (parent->left == v) ? true: false;
 
-         cout<<"v is "<<v->time_stamp;
+        //LRU thingy todo
+
+
+
+        cout<<"v is "<<v->time_stamp;
          if(left_child) cout<<"  and v is left child"<<endl;
          else cout<<"  and v is right child"<<endl;
          //NEVER DO THIS ON BASIS OF TIMESTAMPS...BECAUSE WE HAVE SWAPPING OCCURING TOO 
@@ -594,19 +598,21 @@ class RBTree
             }
             else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
             {
+
                 if(parent == NULL) //v can even be the root..so it Must be black
                 {
-                    if(rep == v->right)
-                    {
-                        rep->left = v->left;
-                        v->left->parent = rep;
-                    }
-                    else
-                    {
-                        rep->right =v->right;
-                        v->right->parent = rep;
+                    //recent most change
+                    // if(rep == v->right)
+                    // {
+                    //     rep->left = v->left;
+                    //     v->left->parent = rep;
+                    // }
+                    // else
+                    // {
+                    //     rep->right =v->right;
+                    //     v->right->parent = rep;
                         
-                    }
+                    // }
 
                     root = rep;
                     rep->colour = 'b';
@@ -622,6 +628,18 @@ class RBTree
                     parent->right = rep;
                     rep->parent = parent;
                 }
+
+                if(rep == v->right)
+                    {
+                        rep->left = v->left;
+                        v->left->parent = rep;
+                    }
+                    else
+                    {
+                        rep->right =v->right;
+                        v->right->parent = rep;
+                        
+                    }
                 rep->colour = 'b';
                 delete(v);
 
@@ -631,6 +649,7 @@ class RBTree
                 swap_data(v,rep);
                 v->colour = 'b';
                 delete_node(rep); //recur this to rep node now
+                return;
             }
         }
     }
@@ -650,11 +669,11 @@ int main()
     RBTree T;
     RBNode * n1 = T.insert(100,1,100);
     RBNode * n2 =T.insert(101,2,101);
-    RBNode * n4 = T.insert(103,3,103);
-    RBNode * n3 = T.insert(99,3,99);
+    RBNode * n3 = T.insert(103,3,103);
+    RBNode * n4 = T.insert(99,3,99);
     RBNode * n5 = T.insert(78,3,78);
-    // RBNode * n6 = T.insert(32,3,32);
-    // RBNode * n7 = T.insert(356,3,356);
+    RBNode * n6 = T.insert(32,3,32);
+    RBNode * n7 = T.insert(356,3,356);
     // RBNode * n8 = T.insert(42,3,42);
     // RBNode * n9 = T.insert(322,3,322);
     // RBNode * n10 = T.insert(123,3,123);
@@ -670,11 +689,13 @@ int main()
     T.Inorder(T.root);
     T.printLinks(T.root);
 
-    T.delete_node(T.root);
+    T.delete_node(T.root->left);
     cout<<endl<<endl<<endl<<"Deletion complete"<<endl;
     
     cout<<endl<<endl<<endl<<"yo";
-    cout<<"root is"<<T.root<<endl;
+    cout<<"root is"<<T.root->time_stamp<<endl;
     T.Inorder(T.root);
+        T.printLinks(T.root);
+
 }
 
