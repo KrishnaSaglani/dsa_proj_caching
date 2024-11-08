@@ -278,6 +278,7 @@ class RBTree
             return ans;
         }
 
+
         void delete_fixup(RBNode * d_black, RBNode * parent)
         {
             
@@ -413,6 +414,57 @@ class RBTree
             }
     }
 
+    
+    void Level_Order()
+    {
+        queue <RBNode*> q; //lets just store timestamps for now
+        //for testing
+
+        q.push(root);
+
+        while(!q.empty())
+        {
+            cout<<q.front()->key<<" :"<<q.front()->value<<" ("<<q.front()->time_stamp <<")"<<endl;
+            if(q.front()->left !=NULL)
+            {
+                q.push(q.front()->left);
+            }
+            if(q.front()->right !=NULL)
+            {
+                q.push(q.front()->right);
+            }
+            q.pop();
+        }
+    }
+
+
+
+    RBNode * smallest(RBNode * node)
+    {
+        if(node->left == NULL) return node;
+        else return smallest(node->left);
+    }
+
+    RBNode * replacement(RBNode * node)
+    {
+        //leaf
+        if(node->left == NULL && node->right == NULL) return NULL;
+
+        //one child
+        if(node->left == NULL) return node->right;
+        else if(node->right == NULL) return node->left;
+
+        //else : only option left: both not null
+        else return smallest(node->right); //inorder successor
+    }
+
+    void swap_data(RBNode * n1, RBNode * n2)
+    {
+        swap(n1->key, n2->key);
+        swap(n1->value, n2->value);
+        swap(n1->time_stamp, n2->time_stamp);
+    }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public:
     RBNode * LRU_node; //keep updating this node as we go deleting LRU elements
@@ -459,28 +511,6 @@ class RBTree
         
         //hashmap shall have the key followed by node address
     }
-    
-    void Level_Order()
-    {
-        queue <RBNode*> q; //lets just store timestamps for now
-        //for testing
-
-        q.push(root);
-
-        while(!q.empty())
-        {
-            cout<<q.front()->key<<" :"<<q.front()->value<<" ("<<q.front()->time_stamp <<")"<<endl;
-            if(q.front()->left !=NULL)
-            {
-                q.push(q.front()->left);
-            }
-            if(q.front()->right !=NULL)
-            {
-                q.push(q.front()->right);
-            }
-            q.pop();
-        }
-    }
 
     void Inorder(RBNode * node)
     {
@@ -490,34 +520,6 @@ class RBTree
         cout<<node->key<<":"<<node->value<<" ("<<node->time_stamp <<") colour: "<<node->colour<<endl;    
         Inorder(node->right);
     }
-
-    RBNode * smallest(RBNode * node)
-    {
-        if(node->left == NULL) return node;
-        else return smallest(node->left);
-    }
-
-    RBNode * replacement(RBNode * node)
-    {
-        //leaf
-        if(node->left == NULL && node->right == NULL) return NULL;
-
-        //one child
-        if(node->left == NULL) return node->right;
-        else if(node->right == NULL) return node->left;
-
-        //else : only option left: both not null
-        else return smallest(node->right); //inorder successor
-    }
-
-    void swap_data(RBNode * n1, RBNode * n2)
-    {
-        swap(n1->key, n2->key);
-        swap(n1->value, n2->value);
-        swap(n1->time_stamp, n2->time_stamp);
-    }
-
-    
 
     void delete_node(RBNode * v)
     {
