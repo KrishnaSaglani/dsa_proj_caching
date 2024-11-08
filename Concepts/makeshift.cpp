@@ -493,7 +493,6 @@ class RBTree
         RBNode * rep = replacement(v);
         RBNode * parent = v->parent;
         bool left_child = true;
-        bool fixup_done = false;
 
         if(parent!=NULL)
          left_child = (parent->left == v) ? true: false;
@@ -513,15 +512,31 @@ class RBTree
 
             RBNode * d_black;
 
-            if(rep == NULL) //hence v is leaf
+            if(parent == NULL) //basically this is the root deletion case
+            {
+                if(rep == NULL)
+                {
+                    root= NULL;
+                    delete(v);
+                }
+                else if(rep==v->right || rep==v->left)
+                {
+                        cout<<"okay so parent is NULL for 101"<<endl;
+                        swap_data(v,rep);
+                        delete_node(rep);
+                }
+                else
+                {
+                        swap_data(v,rep);
+                        delete_node(rep);
+                }
+
+                return;
+            }
+            else if(rep == NULL) //hence v is leaf
             {
                 //enetered here
-                if(parent == NULL)//root
-                {
-                    root = NULL;
-                    //empty tree now
-                }
-                else if(left_child)
+                if(left_child)
                 {
                     parent->left = NULL;
                 }
@@ -535,14 +550,8 @@ class RBTree
             }
             else if(rep==v->right || rep==v->left) // rep is a child of v..AND a leaf
             {
-                if(parent == NULL) //v can even be the root..so it Must be black
-                {
-                    cout<<"okay so parent is NULL for 101"<<endl;
-                    swap_data(v,rep);
-                    delete_node(rep);
-                    fixup_done = true;
-                }
-                else if(left_child) 
+                
+                if(left_child) 
                 {
                     parent->left = rep;
                     rep->parent = parent;
@@ -562,7 +571,6 @@ class RBTree
             {
                 swap_data(v,rep);
                 delete_node(rep); //recur this to the rep node now
-                fixup_done = true;
                 //also, rep is always a leaf node in this case so the value it gets doesn't matter
                 //now if rep is red...itll be direct deleted..but this is both black case
                 // else it will get a delete_fixup workout 
@@ -570,7 +578,6 @@ class RBTree
 
             //Now time for dblack fixing
             cout<<"okay so far";
-            if(!fixup_done)
             delete_fixup(d_black, parent);
             //parent is just in case dblack is NULL
 
@@ -611,6 +618,7 @@ class RBTree
                     root = rep;
                     rep->colour = 'b';
                     rep->parent = NULL;
+                    delete(v);
                 }
                 else if(left_child) 
                 {
@@ -674,7 +682,7 @@ int main()
     cout<<endl<<endl<<endl<<"Deletion complete"<<endl;
     
     cout<<endl<<endl<<endl<<"yo";
-    cout<<"root is"<<T.root<<endl;
+    cout<<"root is"<<T.root->time_stamp<<endl;
     T.Inorder(T.root);
 }
 
