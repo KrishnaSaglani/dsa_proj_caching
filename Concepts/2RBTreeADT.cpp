@@ -196,10 +196,6 @@ class RBTree
                 
             }
 
-            cout<<"in bal"<<endl;
-            printLinks(root);
-            cout<<"out of bal";
-
             return;
         }
 
@@ -246,7 +242,8 @@ class RBTree
 
             //STEP 2: Validate RB Tree properties
 
-            if(new_node->parent == current  && balanced == false) //so validation occurs only once
+            if(new_node->parent == current  && balanced == false) //double security
+            //so validation occurs only once
             //balancing only required ONCE in insertion case, but NOT the same for deletion
             {
                 Balance(new_node,current);
@@ -260,9 +257,6 @@ class RBTree
                 cout<<"After balancing, root is :"<<root->time_stamp<<endl;
                 //because the tree is rotating around all the time...so root keeps changing
                  return;
-                // cout<<endl<<"in hf"<<endl;
-                // printLinks(current);
-                // cout<<"out of hf";
             }
         }
         //this function always returns the links to root
@@ -295,19 +289,25 @@ class RBTree
             cout<<"in fixup"<<endl;
             if(parent == NULL) //dbalck is root
             {
+                cout<<"check i"<<endl;
                 root = d_black;
                 return;
                 //the black height of tree just went up by 1
                 // as we converted double black to single without actually adding a black node
             }
 
+
             RBNode * sibling = (parent->left == d_black)? parent->right: parent->left;
+            if(sibling!=NULL)
             cout<<"Sibling is "<<sibling->time_stamp<<endl;
+
             bool left_child = (parent->left == d_black)? true : false;
+            //talking about dblack in left_child
 
             //Q: what if sibling is NULL?
             if(sibling == NULL)
             {
+                cout<<"check j"<<endl;
                 delete_fixup(parent, parent->parent);
                 return;
                 //if sibling is null, then double black is pushed up to parent node
@@ -317,9 +317,11 @@ class RBTree
             {
                 if(left_child)
                 {
-                    leftRotate(parent);
+                    cout<<"check a"<<endl;
                     parent->colour = 'r';
                     sibling->colour = 'b';
+                    leftRotate(parent);
+                    
 
                     //now we will have a NEW sibling..whose colour is ALWAYS BLACK
                     //as it was child of a red node
@@ -334,9 +336,11 @@ class RBTree
                 }
                 else
                 {
-                    rightRotate(parent);
+                    cout<<"check b"<<endl;
                     parent->colour = 'r';
                     sibling->colour = 'b';
+                    rightRotate(parent);
+                    
 
                     //root manipulation
                     if(parent == root)
@@ -358,6 +362,7 @@ class RBTree
                     //both kids black
                     if(parent->colour == 'r')
                     {
+                        cout<<"check c"<<endl;
                         parent->colour = 'b';
                         //red + black = double black
                         sibling->colour = 'r';//extra colouring...always try to do so
@@ -366,6 +371,7 @@ class RBTree
                     }
                     else
                     {
+                        cout<<"check d"<<endl;
                         sibling->colour = 'r';
                         delete_fixup(parent, parent->parent);
                     }
@@ -391,7 +397,7 @@ class RBTree
                     {
                         if(left_red)
                         {
-                            cout<<"check a"<<endl;
+                            cout<<"check e"<<endl;
                             sibling->left->colour = 'b';
                             //colour then rotate..as rotation CAN change concepts 
                             //of left and right
@@ -401,7 +407,7 @@ class RBTree
                         }
                         else
                         {
-                                cout<<"check b"<<endl;
+                                cout<<"check f"<<endl;
                                 sibling->right->colour = 'b';
                                 sibling->colour = parent->colour;
                                 leftRotate(parent);
@@ -414,7 +420,7 @@ class RBTree
                     {
                         if(left_red)
                         {
-                                cout<<"check c"<<endl;
+                                cout<<"check g"<<endl;
                                 sibling->left->colour = 'b';
                                 sibling->colour = parent->colour;
                                 rightRotate(parent);
@@ -423,7 +429,7 @@ class RBTree
                         }
                         else
                         {
-                                cout<<"check d"<<endl;
+                                cout<<"check h"<<endl;
                                 sibling->right->colour = 'b';
                                 leftRotate(sibling);
                                 rightRotate(parent);
@@ -724,20 +730,31 @@ int main()
     RBNode * n1 = T.insert(100,1,100);
     RBNode * n2 =T.insert(101,2,101);
     RBNode * n3 = T.insert(103,3,103);
+    T.delete_node(T.LRU_node);
     RBNode * n4 = T.insert(99,3,99);
     RBNode * n5 = T.insert(78,3,78);
+    T.delete_node(T.LRU_node);
     RBNode * n6 = T.insert(32,3,32);
+    T.delete_node(T.root);
     RBNode * n7 = T.insert(356,3,356);
     RBNode * n8 = T.insert(42,3,42);
     RBNode * n9 = T.insert(322,3,322);
     RBNode * n10 = T.insert(123,3,123);
+    T.delete_node(T.root->left);
     RBNode * n11 = T.insert(33,3,33);
     RBNode * n12 = T.insert(5456,3,5456);
+    T.delete_node(T.root->right);
     RBNode * n13 = T.insert(65,3,65);
+    T.delete_node(T.LRU_node);
     RBNode * n14 = T.insert(221,3,221);
     RBNode * n15 = T.insert(3452,3,3452);
+    T.delete_node(T.root);
+    RBNode * n16 = T.insert(23,3,3452);
+        T.delete_node(T.root);
+
 
     cout<<endl<<"end of tree creation"<<endl<<endl;
+    T.Inorder(T.root);
 
 
     // //TEST 1
@@ -812,6 +829,15 @@ int main()
     // cout<<"root is "<<T.root->time_stamp<<endl;
     // T.Inorder(T.root);
     // cout<<endl<<endl<<endl;
+
+    // T.delete_node(T.root->left->left);
+    //     // cout<<endl<<"after deletion "<<++i<<endl;
+    //     //problem is basically root manipulation after deletion occurs
+    //     T.printLinks(T.root);
+    //     if(T.root!=NULL)
+    //     cout<<"root is "<<T.root->time_stamp<<endl;
+    //     T.Inorder(T.root);
+    //     cout<<endl<<endl<<endl;
 
     int i =0;
     while(T.root != NULL)

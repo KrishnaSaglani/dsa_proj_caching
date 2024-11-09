@@ -1,0 +1,21 @@
+get 40
+get 74
+get 173
+put 167 Gene Smith
+put 108 Timothy Murphy
+get 107
+get 115
+get 4
+put 89 Jaclyn Castaneda
+get 31
+put 184 Caleb Cole
+put 65 Joshua Fitzpatrick
+put 166 Wesley Cruz
+get 84
+put 105 Eric Brown
+put 99 Tabitha Johnson
+get 200
+get 170
+get 35
+get 129
+
