@@ -18,4 +18,27 @@ get 200
 get 170
 get 35
 get 129
-
+get 24
+get 84
+get 74
+get 162
+put 26 Lisa Gonzalez
+get 51
+put 156 Kenneth Edwards
+get 65
+get 49
+get 55
+put 19 Jon Mitchell
+put 157 Randy Taylor
+get 42
+put 136 Ricky Walker
+put 166 David Zimmerman
+get 198
+get 134
+get 75
+put 136 Jordan Smith
+get 133
+get 93
+put 187 James Brewer
+get 123
+get 163

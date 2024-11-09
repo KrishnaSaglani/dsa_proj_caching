@@ -9,7 +9,7 @@ int main()
     cin>>capacity;
     LRUCache L(capacity);
 
-    typedef struct Data
+    typedef struct Data100
     {
         string operation;
         int key;
@@ -26,7 +26,8 @@ int main()
     string line;
 
     // Process each line of the file
-    while (getline(file, line)) {
+    while (getline(file, line)) 
+    {
         istringstream iss(line);
         iss >> d.operation >> d.key;
 
