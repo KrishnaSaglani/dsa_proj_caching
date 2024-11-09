@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRU Cache System</title>
+    <link rel="stylesheet" href="trial 1.css">
+</head>
+<body>
+    <div class="container">
+        <h1>LRU Cache System</h1>
+        <div class="input-section">
+            <label for="capacitor">capacitor:</label>
+            <input type="text" id="capacitor" placeholder="Enter value">
+            <button id="cacheForm">Put Data</button>
+        </div>
+        <div class="cache-display">
+            <h2>Cache Contents</h2>
+            <table id="cache-table">
+                <thead>
+                    <tr>
+                        <th>hitrate</th>
+                        <th>average access time</th>
+                        <th>eviction count</th>
+                    </tr>
+                </thead>
+                <tbody id="cache-contents">
+                    <!-- table rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        // Handle button click to prevent page reload
+        document.getElementById('cacheForm').addEventListener('click', async function(event) {
+            event.preventDefault();
+            console.log("Button clicked");
+            
+            const capacity = document.getElementById('capacitor').value;  // Updated to match the HTML input ID
+            const response = await fetch('/initialize_cache', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ capacity: capacity })
+            });
+
+            const metrics = await response.json();
+
+            // Update metrics on the page
+            document.getElementById('cache-contents').innerHTML = `
+                <tr>
+                    <td>${metrics.hitRate}</td>
+                    <td>${metrics.accessTime}</td>
+                    <td>${metrics.evictionCount}</td>
+                </tr>
+            `;
+        });
+    </script>
+</body>
+</html>
