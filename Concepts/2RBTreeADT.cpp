@@ -32,6 +32,8 @@ class RBTree
 {
     private:
 
+
+
         void leftRotate(RBNode * Imb_node)  //Imb_node = Imbalanced node
         {
             RBNode * child = Imb_node->right;
@@ -115,6 +117,7 @@ class RBTree
             else return parent->left;
         }
 
+        
         //btw parent always exists...uncle and grandparent may not
         void Balance(RBNode * child, RBNode* parent)
         {
@@ -127,16 +130,18 @@ class RBTree
             // if you reach here...grandparent MUST exist for sure
 
             RBNode * uncle = find_sibling(parent);
-            // if(uncle==NULL)cout<<"Uncle is NULL"<<endl;
+
+            if(uncle==NULL)cout<<"Uncle is NULL"<<endl;
             if(uncle==NULL  || uncle->colour == 'b') //black uncle..in RB trees we consider NULL as black also
             {
                 //rotation then recolouring
                 //assuming grandparent exists..if not then still okay
                 //as it will just be a NULL return point
-                bool left_child = (child->time_stamp <= parent->time_stamp)? true:false;
+                //CAREFULLLLLLLLLLLLLLLLL HERE
+                bool left_child = (parent->left == child)? true:false;
 
 
-                if(parent->time_stamp <= grandparent->time_stamp) //parent at left
+                if(grandparent->left == parent) //parent at left
                 {
                     if(left_child)
                     {
@@ -150,6 +155,9 @@ class RBTree
                         rightRotate(grandparent);
                         grandparent->colour = 'r';
                         child->colour = 'b';//now child is in place of parent
+
+                        cout<<"super careful examination in process:"<<endl;
+                        printLinks(root);
                     }
                 }
 
@@ -188,13 +196,14 @@ class RBTree
                 
             }
 
-            // cout<<"in bal"<<endl;
-            // printLinks(root->parent);
-            // cout<<"out of bal";
+            cout<<"in bal"<<endl;
+            printLinks(root);
+            cout<<"out of bal";
 
             return;
         }
 
+        bool balanced = false;
         //height() and balance_check() is not required thanks to RB tree properties
         void insert_helper(RBNode * current, RBNode * new_node)
         {
@@ -237,18 +246,20 @@ class RBTree
 
             //STEP 2: Validate RB Tree properties
 
-            if(new_node->parent == current) //so validation occurs only once
+            if(new_node->parent == current  && balanced == false) //so validation occurs only once
             //balancing only required ONCE in insertion case, but NOT the same for deletion
             {
                 Balance(new_node,current);
-
+                balanced = true;
                 //Now just CLIMB to the top from here and whatever is 
                 //the topmost thing..just make it the root
 
                 while(current->parent != NULL) current = current->parent;
                 root = current; //SUPER SUPER IMPORTANT step
-                //because the tree is rotating around all the time...so root keeps changing
 
+                cout<<"After balancing, root is :"<<root->time_stamp<<endl;
+                //because the tree is rotating around all the time...so root keeps changing
+                 return;
                 // cout<<endl<<"in hf"<<endl;
                 // printLinks(current);
                 // cout<<"out of hf";
@@ -281,7 +292,7 @@ class RBTree
 
         void delete_fixup(RBNode * d_black, RBNode * parent)
         {
-            
+            cout<<"in fixup"<<endl;
             if(parent == NULL) //dbalck is root
             {
                 root = d_black;
@@ -364,21 +375,38 @@ class RBTree
                 else//at least one of child sibling is red
                 //check this else Logic out one more time during final testing
                 {
-                    bool left_red = sibling->left->colour=='r' ? true: false;
+                    bool left_red;
+                    if(sibling->left != NULL)
+                    {
+                        if(sibling->left->colour == 'r') left_red = true;
+                        else left_red = false;
+                    }
+                    else //if left is null i.e. black, then right must be red
+                    {
+                        left_red = false;
+                    }
+
                     //don't assume that parent is black only
                     if(left_child) //dblack is left child
                     {
                         if(left_red)
                         {
+                            cout<<"check a"<<endl;
+                            sibling->left->colour = 'b';
+                            //colour then rotate..as rotation CAN change concepts 
+                            //of left and right
                             rightRotate(sibling);
                             leftRotate(parent);
-                            sibling->left->colour = parent->colour;
+                            
                         }
                         else
                         {
-                                leftRotate(parent);
-                                sibling->right->colour = sibling->colour;
+                                cout<<"check b"<<endl;
+                                sibling->right->colour = 'b';
                                 sibling->colour = parent->colour;
+                                leftRotate(parent);
+                                
+                                
                         }
                         parent->colour = 'b';
                     }
@@ -386,32 +414,34 @@ class RBTree
                     {
                         if(left_red)
                         {
-                            cout<<"yo"<<endl;
-                                rightRotate(parent);
+                                cout<<"check c"<<endl;
                                 sibling->left->colour = 'b';
                                 sibling->colour = parent->colour;
-
+                                rightRotate(parent);
                                 
-   
                                 
                         }
                         else
                         {
+                                cout<<"check d"<<endl;
+                                sibling->right->colour = 'b';
                                 leftRotate(sibling);
                                 rightRotate(parent);
-                                sibling->right->colour = parent->colour;
+                                
                         }
+                        parent->colour = 'b';
                     }
                     //root manipulation
-                                 if(parent == root)
-                                {
-                                    root = parent->parent;
-                                    cout<<"so parent was indeed root"<<endl;
-                                }
-                                         printLinks(root);
-                                         Inorder(root);
+                    if(parent == root)
+                    {
+                    root = parent->parent;
+                    cout<<"so parent was indeed root"<<endl;
+                    }            
+
                 }
             }
+
+            cout<<"out of fixup"<<endl;
     }
 
     
@@ -472,6 +502,7 @@ class RBTree
 
     void printLinks(RBNode* node) 
     {
+        // cout<<" at end of insertion root is "<<root->time_stamp<<endl;
         if (!node) return;
         cout << "Node " << node->key << ": ";
         if (node->left) cout << "Left->" << node->left->key << " ";
@@ -498,6 +529,7 @@ class RBTree
         }
         else
         {
+            balanced = false;//restore the balanced variable every time
             insert_helper(root,new_node);
             //old root, new_node
         }
@@ -612,10 +644,14 @@ class RBTree
         {
             //copy data from rep to v and delete one of them
 
-            if(rep == NULL) //hence v is leaf
+            if(rep == NULL) //hence v is leaf..and a red one for sure
             {
-
-                if(left_child)
+                if(parent == NULL)
+                {
+                    root = rep;
+                    rep->colour = 'b';
+                }
+                else if(left_child)
                 {
                     parent->left = NULL;
                 }
@@ -695,58 +731,100 @@ int main()
     RBNode * n8 = T.insert(42,3,42);
     RBNode * n9 = T.insert(322,3,322);
     RBNode * n10 = T.insert(123,3,123);
-    // RBNode * n11 = T.insert(33,3,33);
-    // RBNode * n12 = T.insert(5456,3,5456);
-    // RBNode * n13 = T.insert(65,3,65);
-    // RBNode * n14 = T.insert(221,3,221);
-    // RBNode * n15 = T.insert(3452,3,3452);
+    RBNode * n11 = T.insert(33,3,33);
+    RBNode * n12 = T.insert(5456,3,5456);
+    RBNode * n13 = T.insert(65,3,65);
+    RBNode * n14 = T.insert(221,3,221);
+    RBNode * n15 = T.insert(3452,3,3452);
 
-    cout<<"end of tree creation"<<endl<<endl;
+    cout<<endl<<"end of tree creation"<<endl<<endl;
 
-    //TEST 1
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 1"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
 
-    //TEST 2
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 2"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
+    // //TEST 1
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 1"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
 
-    //TEST 3
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 3"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
+    // //TEST 2
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 2"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
 
-    //TEST 4
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 4"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
+    // //TEST 3
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 3"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
 
-    //TEST 5
-    T.delete_node(T.root);
-    cout<<endl<<"after deletion 5"<<endl;
-    //problem is basically root manipulation after deletion occurs
-    T.printLinks(T.root);
-    cout<<"root is "<<T.root->time_stamp<<endl;
-    T.Inorder(T.root);
-    cout<<endl<<endl<<endl;
+    // //TEST 4
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 4"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
+
+    // //TEST 5
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 5"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
+
+    // //TEST 6
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 6"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
+
+    // //TEST 7
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 7"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
+
+    // //TEST 8
+    // T.delete_node(T.root);
+    // cout<<endl<<"after deletion 8"<<endl;
+    // //problem is basically root manipulation after deletion occurs
+    // T.printLinks(T.root);
+    // if(T.root!=NULL)
+    // cout<<"root is "<<T.root->time_stamp<<endl;
+    // T.Inorder(T.root);
+    // cout<<endl<<endl<<endl;
+
+    int i =0;
+    while(T.root != NULL)
+    {
+        T.delete_node(T.root);
+        cout<<endl<<"after deletion "<<++i<<endl;
+        //problem is basically root manipulation after deletion occurs
+        T.printLinks(T.root);
+        if(T.root!=NULL)
+        cout<<"root is "<<T.root->time_stamp<<endl;
+        T.Inorder(T.root);
+        cout<<endl<<endl<<endl;
+    }
 
 
     cout<<"yayy....?";
