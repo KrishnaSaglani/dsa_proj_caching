@@ -38,6 +38,8 @@ class RBTree
 
         void leftRotate(RBNode * Imb_node)  //Imb_node = Imbalanced node
         {
+            if (!Imb_node || !Imb_node->right) return;
+
             RBNode * child = Imb_node->right;
             RBNode * temp = child->left;
             RBNode * source = Imb_node->parent;
@@ -49,24 +51,16 @@ class RBTree
             Imb_node->parent = child;
             child->parent = source;
 
-            // //extra precaution due to some errors
-            // if(temp == NULL) Imb_node->right = NULL; useless
-
-            //test prints
-            // if(Imb_node->right == NULL)cout<<"Imb_node linked well with temp"<<endl;
-            // if(child ->left == Imb_node)cout<<endl<<" new root and Imb linked well too"<<endl;
-            // if(Imb_node->left == NULL)cout<<"Imb left has stayed NULL";
-
-            // cout<<endl<<"in rot"<<endl;
-            // printLinks(child);
-            // cout<<"out of rot";
-            //concl: we are perfectly ok till here
-
             //relink to source now
-            if(source==NULL) return;
+            if(source==NULL) 
+            {
+                //CHANGE MADE HERE
+                root = child;
+                return;
+            }
             else
             {
-                if(source->time_stamp >= Imb_node->time_stamp)//Imb_Node WAS left child
+                if(source->left == Imb_node)//Imb_Node WAS left child
                 {
                     source->left = child;
                 }
@@ -83,6 +77,7 @@ class RBTree
 
         void rightRotate(RBNode * Imb_node)
         {
+            if (!Imb_node || !Imb_node->left) return;
             RBNode * child = Imb_node->left;
             RBNode * temp = child->right;
             RBNode * source = Imb_node->parent;
@@ -96,16 +91,20 @@ class RBTree
             child->parent = source;
 
             //relink to source now
-            if(source==NULL) return;
+            if(source==NULL) 
+            {
+                root = child;
+                return;
+            }
             else
             {
-                if(source->time_stamp >= Imb_node->time_stamp)//Imb_Node WAS left child
+                if(source->right == Imb_node)//Imb_Node WAS right child
                 {
-                    source->left = child;
+                    source->right = child;
                 }
                 else
                 {
-                    source->right = child;
+                    source->left = child;
                 }
             }
         }
@@ -198,9 +197,9 @@ class RBTree
                 
             }
 
-            cout<<"in bal"<<endl;
-            printLinks(root);
-            cout<<"out of bal";
+            // cout<<"in bal"<<endl;
+            // printLinks(root);
+            // cout<<"out of bal";
 
             return;
         }
@@ -261,9 +260,6 @@ class RBTree
 
                 //because the tree is rotating around all the time...so root keeps changing
                  return;
-                // cout<<endl<<"in hf"<<endl;
-                // printLinks(current);
-                // cout<<"out of hf";
             }
         }
         //this function always returns the links to root
@@ -458,35 +454,14 @@ class RBTree
             cout<<"out of fixup"<<endl;
     }
 
-    
-    void Level_Order()
-    {
-        queue <RBNode*> q; //lets just store timestamps for now
-        //for testing
-
-        q.push(root);
-
-        while(!q.empty())
-        {
-            cout<<q.front()->key<<" :"<<q.front()->value<<" ("<<q.front()->time_stamp <<")"<<endl;
-            if(q.front()->left !=NULL)
-            {
-                q.push(q.front()->left);
-            }
-            if(q.front()->right !=NULL)
-            {
-                q.push(q.front()->right);
-            }
-            q.pop();
-        }
-    }
-
-
 
     RBNode * smallest(RBNode * node)
     {
-        if(node->left == NULL) return node;
-        else return smallest(node->left);
+        while(node && node->left)
+        {
+            node= node->left;
+        }
+        return node;
     }
 
     RBNode * replacement(RBNode * node)
@@ -782,8 +757,7 @@ class LRUCache{
 
     } //constructor for lru cache with capacity cap
 
-    //get function
-    string get(int key) {
+        string get(int key) {
 
         auto start = chrono::high_resolution_clock::now();
 
@@ -794,11 +768,14 @@ class LRUCache{
         }
         RBNode* node = map[key]; //find the node with key
         string tempo = node->value;
-        
-        //increaseTimestamp(node); // Update the timestamp for the node
-        map.erase(key);
-        map[key] = tree.insert(node->key, node->value, ++(node->time_stamp)); // Re-insert the node with updated timestamp to update the tree
+
+        //first delete value from tree
         tree.delete_node(node);
+
+        //then reinsert with new timestamp
+        RBNode* new_node = tree.insert(node->key, node->value, ++time);
+        map[key] = new_node;
+        
         hits++; // Record cache hit
         auto end = chrono::high_resolution_clock::now();
         totalAccessTime += chrono::duration_cast<chrono::nanoseconds>(end - start).count();
@@ -812,28 +789,33 @@ class LRUCache{
 
         if (map.find(key) != map.end()) {
             // if Key already exists, update its value and timestamp
-            RBNode* node = map[key]; //find node with key
-            node->value = value;    //update it's value
-            increaseTimestamp(node); //increase timestamp;
-            tree.insert(node->key, node->value, node->time_stamp);
+            RBNode* old_node = map[key]; //find node with key
+            tree.delete_node(old_node);
+            increaseTimestamp(old_node); //increase timestamp;
         }
         // if key does not exist already
          else 
          {
             if (map.size() == capacity) {
                 // Cache is full, remove the least recently used (leftmost node in RBTree)
-                RBNode* leastRecent = tree.LRU_node;
-                map.erase(leastRecent->key); //remove from map
-                tree.delete_node(tree.LRU_node); //remove from tree
-                evictions++; // Record eviction event
+                if(tree.LRU_node)
+                {
+                    map.erase(tree.LRU_node->key);
+                    tree.delete_node(tree.LRU_node);
+                    evictions++;
+                }
             }
             // Insert the new node in the cache and the RBTree
-            RBNode* newNode = tree.insert(key, value, ++time);
-            map[key] = newNode;
+            
         }
+
+        RBNode* newNode = tree.insert(key, value, ++time);
+        map[key] = newNode;
         auto end = chrono::high_resolution_clock::now();
         totalAccessTime += chrono::duration_cast<chrono::nanoseconds>(end - start).count();
     }
+
+    
 
     double HitRate() const{                     //Measures how often the requested data is found in the cache 
                                                 //without requiring a new insertion. This shows how effectively
@@ -861,12 +843,15 @@ class LRUCache{
 #include <cstdlib> // for std::atoi
 int main(int argc, char* argv[])
 {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <integer>" << std::endl;
-        return 1; // Return an error code if the input is incorrect
-    }
+    // if (argc != 2) {
+    //     std::cerr << "Usage: " << argv[0] << " <integer>" << std::endl;
+    //     return 1; // Return an error code if the input is incorrect
+    // }
 
-    int capacity = atoi(argv[1]);
+    // int capacity = atoi(argv[1]);
+
+    int capacity;
+    cin>>capacity;
 
     LRUCache L(capacity);
 
@@ -916,39 +901,6 @@ int main(int argc, char* argv[])
 
     file.close();
 
-
-
-    // ifstream file("0data.txt");
-    // if (!file) {
-    //     std::cerr << "Error opening file\n";
-    //     return 1;
-    // }
-
-    // Data d;
-    // while (file >> d.operation >> d.key) {
-    //     // Check if it's a "put" operation, which requires reading an additional value
-    //     if (d.operation == "put") {
-    //         file >> d.value;
-    //     } else {
-    //         d.value.clear(); // Clear any previous value for "get" operation
-    //     }
-
-    //     // Output the operation for debugging
-    //     cout << "Operation: " << d.operation << ", Key: " << d.key;
-    //     if (d.operation == "put") {
-    //         cout << ", Value: " << d.value;
-    //     }
-    //     cout << endl;
-
-    //     // Perform the cache operation
-    //     if (d.operation == "get") {
-    //         cout<<L.get(d.key)<<endl;
-    //     } else if (d.operation == "put") {
-    //         L.put(d.key, d.value);
-    //     }
-    // }
-
-    
     double hit_rate = L.HitRate(), total_access_time = L.AverageAccessTime();
     int eviction_count= L.EvictionCount();
 
