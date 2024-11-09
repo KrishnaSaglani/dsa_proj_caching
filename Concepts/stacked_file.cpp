@@ -858,10 +858,16 @@ class LRUCache{
 };
 
 //comment
-int main()
+#include <cstdlib> // for std::atoi
+int main(int argc, char* argv[])
 {
-    int capacity;
-    cin>>capacity;
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <integer>" << std::endl;
+        return 1; // Return an error code if the input is incorrect
+    }
+
+    int capacity = atoi(argv[1]);
+
     LRUCache L(capacity);
 
     typedef struct Data100
