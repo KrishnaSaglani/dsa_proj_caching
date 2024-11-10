@@ -3,7 +3,7 @@ import random
 
 # Initialize Faker and set the number of operations
 faker = Faker()
-num_operations = 123  # Total number of operations (get and put combined)
+num_operations = 1000  # Total number of operations (get and put combined)
 max_key_value = 200   # Maximum range for key values
 
 # File to write the data
