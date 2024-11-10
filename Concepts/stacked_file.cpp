@@ -523,8 +523,8 @@ class RBTree
             //old root, new_node
         }
         
-        cout<<endl<<endl<<"so far:"<<endl;
-        printLinks(root);
+        // cout<<endl<<endl<<"so far:"<<endl;
+        // printLinks(root);
         return new_node;
         //I will thus be returning the new_node's address so that it can be put into the 
         //hashmap also
@@ -843,15 +843,13 @@ class LRUCache{
 #include <cstdlib> // for std::atoi
 int main(int argc, char* argv[])
 {
-    // if (argc != 2) {
-    //     std::cerr << "Usage: " << argv[0] << " <integer>" << std::endl;
-    //     return 1; // Return an error code if the input is incorrect
-    // }
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <integer>" << std::endl;
+        return 1; // Return an error code if the input is incorrect
+    }
 
-    // int capacity = atoi(argv[1]);
+    int capacity = atoi(argv[1]);
 
-    int capacity;
-    cin>>capacity;
 
     LRUCache L(capacity);
 
