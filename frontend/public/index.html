@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRU Cache System</title>
+    <link rel="stylesheet" href="trial 1.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>LRU Cache System</h1>
+        <div class="input-section">
+            <label for="capacitor">Capacity:</label>
+            <input type="text" id="capacitor" placeholder="Enter value">
+            <button id="cacheFom">Put Data</button>
+        </div>
+    </div>
+
+    <!-- Red-Black Tree LRU parameter section below the Put Data button -->
+    <div class="RB LRU parameter">
+        <h3>Red Black Tree LRU parameter</h3>
+        <table id="cache-table">
+            <thead>
+                <tr>
+                    <th>Hit-rate</th>
+                    <th>Average Access Time</th>
+                    <th>Eviction Count</th>
+                </tr>
+            </thead>
+            <tbody id="RB LRU parameter">
+                <!-- table rows -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DLL LRU parameter section -->
+    <div class="DLL LRU parameters">
+        <h3>DLL LRU Parameter</h3>
+        <table id="cache-table">
+            <thead>
+                <tr>
+                    <th>Hit-rate</th>
+                    <th>Average Access Time</th>
+                    <th>Eviction Count</th>
+                </tr>
+            </thead>
+            <tbody id="DLL LRU parameter">
+                <!-- table rows -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Handle form submission to prevent page reload
+        document.getElementById('cacheFom').addEventListener('click', async function(event) {
+            event.preventDefault();
+
+            const capacity = document.getElementById('capacitor').value;
+            const response = await fetch('/initialize_cache', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ capacity: capacity })
+            });
+
+            const metrics = await response.json();
+
+            // Update metrics on the page
+            document.getElementById('hitRate').textContent = `${metrics.hitRate}`;
+            document.getElementById('accessTime').textContent = metrics.accessTime;
+            document.getElementById('evictionCount').textContent = metrics.evictionCount;
+        });
+    </script>
+</body>
+
+</html>

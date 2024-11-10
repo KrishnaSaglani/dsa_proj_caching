@@ -682,8 +682,9 @@ class RBTree
 };
 
 
-#include <chrono>
-#include <unordered_map>
+// #include <chrono>
+
+using namespace std::chrono; 
 
 
 
@@ -806,24 +807,159 @@ class LRUCache{
 
 };
 
+struct DListNode 
+{
+    int key;
+    string value;
+    DListNode* prev;
+    DListNode* next;
+
+    DListNode(int k, string v) : key(k), value(v), prev(nullptr), next(nullptr) {} //constructor for dll
+};
+
+class DLL_LRUCache 
+{
+private:
+    int capacity;
+    int hits;
+    int misses;
+    int evictions;
+    long long totalAccessTime;
+    unordered_map<int, DListNode*> cacheMap; // Maps key to node in the doubly linked list
+    DListNode* head; // Head of the doubly linked list (MRU position)
+    DListNode* tail; // Tail of the doubly linked list (LRU position)
+
+    void add_node_to_front(DListNode* node) // Adds a node right after the head (most recently used)
+    {
+       node->next = head->next;
+        node->prev = head;
+
+        head->next->prev = node;
+        head->next = node;
+    }
+
+    void delete_node(DListNode* node) // Disconnects a node from the list
+   {     
+        DListNode* prev = node->prev;
+        DListNode* next = node->next;
+
+        prev->next = next;
+        next->prev = prev;
+    }
+
+    void moveToHead(DListNode* node)  // Move accessed node to the head (most recently used)
+    {
+       
+        delete_node(node);              //deletes the node and adds it in the front
+        add_node_to_front(node);
+    }
+
+    DListNode* removeTail() {       // Removes the least recently used node (just before tail)
+        
+        DListNode* node = tail->prev;
+        delete_node(node);
+        return node;
+    }
+
+public:
+    DLL_LRUCache(int cap) : capacity(cap), hits(0), misses(0), evictions(0), totalAccessTime(0) 
+    {
+        head = new DListNode(0, 0); // Dummy head
+        tail = new DListNode(0, 0); // Dummy tail
+        head->next = tail;
+        tail->prev = head;
+    }
+
+    string get(int key) 
+    {
+        auto start = high_resolution_clock::now();  // for measuring avg access time 
+
+        if (cacheMap.find(key) == cacheMap.end())   // Key not found in cache 
+        {
+            misses++;
+            return "not found";
+        }
+
+                                                    // Key found in cache 
+        hits++;
+        DListNode* node = cacheMap[key];   //put it in a node
+        moveToHead(node);   //move to head
+
+        auto end = high_resolution_clock::now();
+        totalAccessTime += duration_cast<nanoseconds>(end - start).count();
+
+        return node->value;
+    }
+
+    void put(int key, string value) 
+    {
+        auto start = high_resolution_clock::now();
+
+        if (cacheMap.find(key) !=cacheMap.end()) { // Key exists 
+           
+            DListNode* node =cacheMap[key];
+            node->value =value;
+            moveToHead(node);                       //update value and move to head
+        } 
+        else {                                      //if key does not exist
+                                                    // Insert new node
+            DListNode* newNode = new DListNode(key, value);
+            cacheMap[key] = newNode;
+            add_node_to_front(newNode);
+
+            if (cacheMap.size() > capacity)
+             {
+                                                    // if capacity exceeds, evict LRU item(tail)
+                DListNode* lru = removeTail();
+                cacheMap.erase(lru->key);
+                delete lru;
+                evictions++;
+            }
+        }
+
+        auto end = high_resolution_clock::now();
+        totalAccessTime += duration_cast<nanoseconds>(end - start).count();
+    }
+
+    // efficiency parameters
+    double getCacheHitRate() const {
+        int totalAccesses = hits + misses;
+        return totalAccesses > 0 ? static_cast<double>(hits) / totalAccesses : 0.0;
+    }
+
+    double getAverageAccessTime() const {
+        int totalOps = hits + misses;
+        return totalOps > 0 ? static_cast<double>(totalAccessTime) / totalOps : 0;
+    }
+
+    int getEvictionCount() const {
+        return evictions;
+    }
+
+};
+
 //comment
 #include <cstdlib> // for std::atoi
 int main(int argc, char* argv[])
 {
 
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <capacity>\n";
-        return 1;
-    }
+    // if (argc != 2) {
+    //     std::cerr << "Usage: " << argv[0] << " <capacity>\n";
+    //     return 1;
+    // }
 
-    int capacity = std::atoi(argv[1]);
+    // int capacity = std::atoi(argv[1]);
 
-    if (capacity <= 0) {
-        std::cerr << "Capacity must be a positive integer\n";
-        return 1;
-    }
+    // if (capacity <= 0) {
+    //     std::cerr << "Capacity must be a positive integer\n";
+    //     return 1;
+    // }
+
+    int capacity;
+    cin>>capacity;
 
     LRUCache L(capacity);
+    DLL_LRUCache D(capacity);
 
     typedef struct Data100
     {
@@ -862,17 +998,45 @@ int main(int argc, char* argv[])
         // Perform the cache operation
         if (d.operation == "get") {
             L.get(d.key);
+            D.get(d.key);
         } else if (d.operation == "put") {
             L.put(d.key, d.value);
+            D.put(d.key,d.value);
         }
     }
 
     file.close();
 
-    double hit_rate = L.HitRate(), total_access_time = L.AverageAccessTime();
-    int eviction_count= L.EvictionCount();
+    double hit_rate1 = L.HitRate(), total_access_time1 = L.AverageAccessTime();
+    int eviction_count1= L.EvictionCount();
+
+    double hit_rate2 = D.getCacheHitRate(), total_access_time2 = D.getAverageAccessTime();
+    int eviction_count2= D.getEvictionCount();
+
+    float hit_rate_ratio, time_ratio, eviction_ratio;
+
+    if(hit_rate2 != 0)
+    {
+        hit_rate_ratio = hit_rate1/hit_rate2;
+    }
+
+    if(total_access_time2 != 0)
+    {
+        time_ratio = total_access_time1/total_access_time2;
+    }
+
+    if(eviction_count2 != 0)
+    {
+        eviction_ratio = eviction_count1/eviction_count2;
+    }
 
     //final output is here
-    cout<<hit_rate<<endl<<total_access_time<<endl<<eviction_count;
+    cout<<hit_rate_ratio<<endl<<time_ratio<<endl<<eviction_ratio;
 
 }
+
+
+
+
+
+// structure for the doubly linked list
