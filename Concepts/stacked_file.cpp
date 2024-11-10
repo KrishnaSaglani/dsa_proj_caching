@@ -132,13 +132,11 @@ class RBTree
 
             RBNode * uncle = find_sibling(parent);
 
-            if(uncle==NULL)cout<<"Uncle is NULL"<<endl;
             if(uncle==NULL  || uncle->colour == 'b') //black uncle..in RB trees we consider NULL as black also
             {
                 //rotation then recolouring
                 //assuming grandparent exists..if not then still okay
                 //as it will just be a NULL return point
-                //CAREFULLLLLLLLLLLLLLLLL HERE
                 bool left_child = (parent->left == child)? true:false;
 
 
@@ -157,8 +155,6 @@ class RBTree
                         grandparent->colour = 'r';
                         child->colour = 'b';//now child is in place of parent
 
-                        cout<<"super careful examination in process:"<<endl;
-                        printLinks(root);
                     }
                 }
 
@@ -196,10 +192,6 @@ class RBTree
                  }
                 
             }
-
-            // cout<<"in bal"<<endl;
-            // printLinks(root);
-            // cout<<"out of bal";
 
             return;
         }
@@ -290,10 +282,8 @@ class RBTree
 
         void delete_fixup(RBNode * d_black, RBNode * parent)
         {
-            cout<<"in fixup"<<endl;
             if(parent == NULL) //dbalck is root
             {
-                cout<<"check i"<<endl;
                 root = d_black;
                 return;
                 //the black height of tree just went up by 1
@@ -302,8 +292,6 @@ class RBTree
 
 
             RBNode * sibling = (parent->left == d_black)? parent->right: parent->left;
-            if(sibling!=NULL)
-            cout<<"Sibling is "<<sibling->time_stamp<<endl;
 
             bool left_child = (parent->left == d_black)? true : false;
             //talking about dblack in left_child
@@ -311,7 +299,6 @@ class RBTree
             //Q: what if sibling is NULL?
             if(sibling == NULL)
             {
-                cout<<"check j"<<endl;
                 delete_fixup(parent, parent->parent);
                 return;
                 //if sibling is null, then double black is pushed up to parent node
@@ -321,7 +308,6 @@ class RBTree
             {
                 if(left_child)
                 {
-                    cout<<"check a"<<endl;
                     parent->colour = 'r';
                     sibling->colour = 'b';
                     leftRotate(parent);
@@ -340,7 +326,6 @@ class RBTree
                 }
                 else
                 {
-                    cout<<"check b"<<endl;
                     parent->colour = 'r';
                     sibling->colour = 'b';
                     rightRotate(parent);
@@ -350,7 +335,6 @@ class RBTree
                     if(parent == root)
                     {
                         root = parent->parent;
-                        cout<<endl<<"root after rotation is "<<root->time_stamp<<endl;
                         //should be 99 in my ex.
                     }
 
@@ -366,7 +350,6 @@ class RBTree
                     //both kids black
                     if(parent->colour == 'r')
                     {
-                        cout<<"check c"<<endl;
                         parent->colour = 'b';
                         //red + black = double black
                         sibling->colour = 'r';//extra colouring...always try to do so
@@ -375,7 +358,6 @@ class RBTree
                     }
                     else
                     {
-                        cout<<"check d"<<endl;
                         sibling->colour = 'r';
                         delete_fixup(parent, parent->parent);
                     }
@@ -401,7 +383,6 @@ class RBTree
                     {
                         if(left_red)
                         {
-                            cout<<"check e"<<endl;
                             sibling->left->colour = 'b';
                             //colour then rotate..as rotation CAN change concepts 
                             //of left and right
@@ -411,7 +392,6 @@ class RBTree
                         }
                         else
                         {
-                                cout<<"check f"<<endl;
                                 sibling->right->colour = 'b';
                                 sibling->colour = parent->colour;
                                 leftRotate(parent);
@@ -424,7 +404,6 @@ class RBTree
                     {
                         if(left_red)
                         {
-                                cout<<"check g"<<endl;
                                 sibling->left->colour = 'b';
                                 sibling->colour = parent->colour;
                                 rightRotate(parent);
@@ -433,7 +412,6 @@ class RBTree
                         }
                         else
                         {
-                                cout<<"check h"<<endl;
                                 sibling->right->colour = 'b';
                                 leftRotate(sibling);
                                 rightRotate(parent);
@@ -445,13 +423,10 @@ class RBTree
                     if(parent == root)
                     {
                     root = parent->parent;
-                    cout<<"so parent was indeed root"<<endl;
                     }            
 
                 }
             }
-
-            cout<<"out of fixup"<<endl;
     }
 
 
@@ -522,9 +497,7 @@ class RBTree
             insert_helper(root,new_node);
             //old root, new_node
         }
-        
-        // cout<<endl<<endl<<"so far:"<<endl;
-        // printLinks(root);
+
         return new_node;
         //I will thus be returning the new_node's address so that it can be put into the 
         //hashmap also
@@ -564,15 +537,9 @@ class RBTree
         if(parent!=NULL)
          left_child = (parent->left == v) ? true: false;
 
-        //  cout<<"v is "<<v->time_stamp;
-        //  if(left_child) cout<<"  and v is left child"<<endl;
-        //  else cout<<"  and v is right child"<<endl;
          //NEVER DO THIS ON BASIS OF TIMESTAMPS...BECAUSE WE HAVE SWAPPING OCCURING TOO 
         
         bool both_black = (rep == NULL || rep->colour == 'b') && v->colour == 'b' ? true: false;
-
-                // cout<<" v is "<<v->time_stamp<<" and rep is "<<rep->time_stamp<<endl;
-
 
         if(both_black) // hence double blacks are going to be created here
         {
@@ -843,13 +810,18 @@ class LRUCache{
 #include <cstdlib> // for std::atoi
 int main(int argc, char* argv[])
 {
+
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <integer>" << std::endl;
-        return 1; // Return an error code if the input is incorrect
+        std::cerr << "Usage: " << argv[0] << " <capacity>\n";
+        return 1;
     }
 
-    int capacity = atoi(argv[1]);
+    int capacity = std::atoi(argv[1]);
 
+    if (capacity <= 0) {
+        std::cerr << "Capacity must be a positive integer\n";
+        return 1;
+    }
 
     LRUCache L(capacity);
 
@@ -883,15 +855,13 @@ int main(int argc, char* argv[])
         }
 
         // Output the operation for debugging
-        cout <<endl<<endl<< "Operation: " << d.operation << ", Key: " << d.key;
         if (d.operation == "put") {
-            cout << ", Value: " << d.value;
+            // cout << ", Value: " << d.value;
         }
-        cout << endl;
 
         // Perform the cache operation
         if (d.operation == "get") {
-            cout<<L.get(d.key)<<endl;
+            L.get(d.key);
         } else if (d.operation == "put") {
             L.put(d.key, d.value);
         }
