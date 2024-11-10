@@ -806,137 +806,6 @@ class LRUCache{
 
 };
 
-struct DListNode 
-{
-    int key;
-    int value;
-    DListNode* prev;
-    DListNode* next;
-
-    DListNode(int k, int v) : key(k), value(v), prev(nullptr), next(nullptr) {} //constructor for dll
-};
-
-class DLL_LRUCache 
-{
-private:
-    int capacity;
-    int hits;
-    int misses;
-    int evictions;
-    long long totalAccessTime;
-    unordered_map<int, DListNode*> cacheMap; // Maps key to node in the doubly linked list
-    DListNode* head; // Head of the doubly linked list (MRU position)
-    DListNode* tail; // Tail of the doubly linked list (LRU position)
-
-    void add_node_to_front(DListNode* node) // Adds a node right after the head (most recently used)
-    {
-       node->next = head->next;
-        node->prev = head;
-
-        head->next->prev = node;
-        head->next = node;
-    }
-
-    void delete_node(DListNode* node) // Disconnects a node from the list
-   {     
-        DListNode* prev = node->prev;
-        DListNode* next = node->next;
-
-        prev->next = next;
-        next->prev = prev;
-    }
-
-    void moveToHead(DListNode* node)  // Move accessed node to the head (most recently used)
-    {
-       
-        delete_node(node);              //deletes the node and adds it in the front
-        add_node_to_front(node);
-    }
-
-    DListNode* removeTail() {       // Removes the least recently used node (just before tail)
-        
-        DListNode* node = tail->prev;
-        delete_node(node);
-        return node;
-    }
-
-public:
-    DLL_LRUCache(int cap) : capacity(cap), hits(0), misses(0), evictions(0), totalAccessTime(0) 
-    {
-        head = new DListNode(0, 0); // Dummy head
-        tail = new DListNode(0, 0); // Dummy tail
-        head->next = tail;
-        tail->prev = head;
-    }
-
-    int get(int key) 
-    {
-        auto start = high_resolution_clock::now();  // for measuring avg access time 
-
-        if (cacheMap.find(key) == cacheMap.end())   // Key not found in cache 
-        {
-            misses++;
-            return -1;
-        }
-
-                                                    // Key found in cache 
-        hits++;
-        DListNode* node = cacheMap[key];   //put it in a node
-        moveToHead(node);   //move to head
-
-        auto end = high_resolution_clock::now();
-        totalAccessTime += duration_cast<nanoseconds>(end - start).count();
-
-        return node->value;
-    }
-
-    void put(int key, int value) 
-    {
-        auto start = high_resolution_clock::now();
-
-        if (cacheMap.find(key) !=cacheMap.end()) { // Key exists 
-           
-            DListNode* node =cacheMap[key];
-            node->value =value;
-            moveToHead(node);                       //update value and move to head
-        } 
-        else {                                      //if key does not exist
-                                                    // Insert new node
-            DListNode* newNode = new DListNode(key, value);
-            cacheMap[key] = newNode;
-            add_node_to_front(newNode);
-
-            if (cacheMap.size() > capacity)
-             {
-                                                    // if capacity exceeds, evict LRU item(tail)
-                DListNode* lru = removeTail();
-                cacheMap.erase(lru->key);
-                delete lru;
-                evictions++;
-            }
-        }
-
-        auto end = high_resolution_clock::now();
-        totalAccessTime += duration_cast<nanoseconds>(end - start).count();
-    }
-
-    // efficiency parameters
-    double getCacheHitRate() const {
-        int totalAccesses = hits + misses;
-        return totalAccesses > 0 ? static_cast<double>(hits) / totalAccesses : 0.0;
-    }
-
-    double getAverageAccessTime() const {
-        int totalOps = hits + misses;
-        return totalOps > 0 ? static_cast<double>(totalAccessTime) / totalOps : 0;
-    }
-
-    int getEvictionCount() const {
-        return evictions;
-    }
-
-};
-
 //comment
 #include <cstdlib> // for std::atoi
 int main(int argc, char* argv[])
@@ -958,7 +827,6 @@ int main(int argc, char* argv[])
     cin>>capacity;
 
     LRUCache L(capacity);
-    DLL_LRUCache D(capacity);
 
     typedef struct Data100
     {
@@ -1011,15 +879,3 @@ int main(int argc, char* argv[])
     cout<<hit_rate<<endl<<total_access_time<<endl<<eviction_count;
 
 }
-
-
-
-#include <iostream>
-#include <unordered_map>
-#include <chrono> 
-
-using namespace std;
-using namespace std::chrono; 
-
-
-// structure for the doubly linked list
